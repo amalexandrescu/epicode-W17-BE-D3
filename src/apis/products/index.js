@@ -1,6 +1,7 @@
 import express from "express";
 import createHttpError from "http-errors";
 import ProductsModel from "./model.js";
+import { Op } from "sequelize";
 
 const productsRouter = express.Router();
 
@@ -15,7 +16,29 @@ productsRouter.post("/", async (req, res, next) => {
 
 productsRouter.get("/", async (req, res, next) => {
   try {
-    const products = await ProductsModel.findAll();
+    const query = {};
+    if (req.query.priceMin && req.query.priceMax) {
+      query.price = {
+        [Op.and]: {
+          [Op.gte]: req.query.priceMin,
+          [Op.lte]: req.query.priceMax,
+        },
+      };
+    }
+    if (req.query.description) {
+      query.description = { [Op.iLike]: `%${req.query.description}%` };
+    }
+
+    if (req.query.name) {
+      query.name = { [Op.iLike]: `%${req.query.name}` };
+    }
+    console.log("query: ", query);
+
+    const products = await ProductsModel.findAll({
+      where: { ...query },
+      // where: { price: { [Op.gte]: 15 } },
+      attributes: ["id", "name", "category", "price", "description"],
+    });
     res.send(products);
   } catch (error) {
     next(error);
