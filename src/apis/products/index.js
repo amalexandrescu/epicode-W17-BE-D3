@@ -17,12 +17,25 @@ productsRouter.post("/", async (req, res, next) => {
 productsRouter.get("/", async (req, res, next) => {
   try {
     const query = {};
-    if (req.query.price) {
+    if (req.query.price.min) {
       query.price = {
-        [Op.between]: [req.query.price.min, req.query.price.max],
+        ...query.price,
+        [Op.gte]: [req.query.price.min],
+        // [Op.gte]: [req.query.price["min"]],
       };
-      // query = http://localhost:3001/product?price[min]=100&price[max]=200
     }
+    if (req.query.price.max) {
+      query.price = {
+        ...query.price,
+        [Op.lte]: [req.query.price.max],
+      };
+    }
+    // if (req.query.price) {
+    //   query.price = {
+    //     [Op.between]: [req.query.price.min, req.query.price.max],
+    //   };
+    //   // query = http://localhost:3001/product?price[min]=100&price[max]=200
+    // }
     // if (req.query.priceMin && req.query.priceMax) {
     //   query.price = {
     //     [Op.and]: {
