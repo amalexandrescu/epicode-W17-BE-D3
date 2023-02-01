@@ -1,0 +1,5 @@
+PG_DB = //name of your db
+PG_USER = //name of your username from postgres
+PG_PASSWORD = //password from postgres, not for pg4Admin
+PG_HOST = //ex. localhosy
+PG_PORT = //the default port of postgres
