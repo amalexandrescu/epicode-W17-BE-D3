@@ -5,6 +5,7 @@ import { Op } from "sequelize";
 import ReviewsModel from "../reviews/model.js";
 import ProductsCategoriesModel from "./productsCategoriesModel.js";
 import CategoriesModel from "../categories/model.js";
+import UsersModel from "../users/model.js";
 
 const productsRouter = express.Router();
 
@@ -34,6 +35,8 @@ productsRouter.post("/", async (req, res, next) => {
 //the commented code is from previous days when we had a min price and a max price in the queries
 productsRouter.get("/", async (req, res, next) => {
   try {
+    // const test = await ProductsModel.max("price");
+    // console.log("test: ", test);
     const query = {};
     // if (req.query.price.min) {
     //   query.price = {
@@ -106,6 +109,14 @@ productsRouter.get("/:productId", async (req, res, next) => {
           model: CategoriesModel,
           attributes: ["name", "categoryId"],
           through: { attributes: [] },
+        },
+        {
+          model: ReviewsModel,
+          attributes: ["content"],
+          include: {
+            model: UsersModel,
+            attributes: ["firstName", "lastName"],
+          },
         },
       ],
       attributes: {
