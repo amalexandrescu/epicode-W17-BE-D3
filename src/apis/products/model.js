@@ -1,5 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../db.js";
+import CategoriesModel from "../categories/model.js";
+import ProductsCategoriesModel from "./productsCategoriesModel.js";
 
 const ProductsModel = sequelize.define("product", {
   id: {
@@ -11,10 +13,10 @@ const ProductsModel = sequelize.define("product", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  category: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
+  // category: {
+  //   type: DataTypes.STRING,
+  //   allowNull: false,
+  // },
   description: {
     type: DataTypes.TEXT,
     allowNull: false,
@@ -27,6 +29,16 @@ const ProductsModel = sequelize.define("product", {
     type: DataTypes.FLOAT,
     allowNull: false,
   },
+});
+
+// Many to many relationship (products can be part of multiple categories)
+ProductsModel.belongsToMany(CategoriesModel, {
+  through: ProductsCategoriesModel,
+  foreignKey: { name: "productId", allowNull: false },
+});
+CategoriesModel.belongsToMany(ProductsModel, {
+  through: ProductsCategoriesModel,
+  foreignKey: { name: "categoryId", allowNull: false },
 });
 
 export default ProductsModel;

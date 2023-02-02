@@ -2,12 +2,15 @@ import express from "express";
 import cors from "cors";
 import listEndpoints from "express-list-endpoints";
 import productsRouter from "./apis/products/index.js";
+import reviewsRouter from "./apis/reviews/index.js";
+import usersRouter from "./apis/users/index.js";
 import { pgConnect, syncModels } from "./db.js";
 import {
   badRequestErrorHandler,
   notFoundErrorHandler,
   genericErrorHandler,
 } from "./errorHandlers.js";
+import categoriesRouter from "./apis/categories/index.js";
 
 const server = express();
 const port = process.env.PORT || 3001;
@@ -18,7 +21,10 @@ server.use(cors());
 server.use(express.json());
 
 //ENDPOINTS
-server.use("/product", productsRouter);
+server.use("/products", productsRouter);
+server.use("/reviews", reviewsRouter);
+server.use("/users", usersRouter);
+server.use("/categories", categoriesRouter);
 
 //ERROR HANDLERS
 

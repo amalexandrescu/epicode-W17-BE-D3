@@ -2,34 +2,52 @@ import express from "express";
 import createHttpError from "http-errors";
 import ProductsModel from "./model.js";
 import { Op } from "sequelize";
+import ReviewsModel from "../reviews/model.js";
+import ProductsCategoriesModel from "./productsCategoriesModel.js";
+import CategoriesModel from "../categories/model.js";
 
 const productsRouter = express.Router();
 
+//this is for adding a new product
+//related to many-to-many relation
 productsRouter.post("/", async (req, res, next) => {
   try {
     const { id } = await ProductsModel.create(req.body);
-    res.status(201).send({ id });
+    if (req.body.categories) {
+      await ProductsCategoriesModel.bulkCreate(
+        req.body.categories.map((category) => {
+          return {
+            categoryId: category,
+            productId: id,
+          };
+        })
+      ); // --> [{categoryId: "asdasd", blogId: "asdasdasdas"}]
+    }
+    res.status(201).send({ productdId: id });
   } catch (error) {
     next(error);
   }
 });
 
+//this endpoint is for fetching all products
+//is related to the many-to-many relation
+//the commented code is from previous days when we had a min price and a max price in the queries
 productsRouter.get("/", async (req, res, next) => {
   try {
     const query = {};
-    if (req.query.price.min) {
-      query.price = {
-        ...query.price,
-        [Op.gte]: [req.query.price.min],
-        // [Op.gte]: [req.query.price["min"]],
-      };
-    }
-    if (req.query.price.max) {
-      query.price = {
-        ...query.price,
-        [Op.lte]: [req.query.price.max],
-      };
-    }
+    // if (req.query.price.min) {
+    //   query.price = {
+    //     ...query.price,
+    //     [Op.gte]: [req.query.price.min],
+    //     // [Op.gte]: [req.query.price["min"]],
+    //   };
+    // }
+    // if (req.query.price.max) {
+    //   query.price = {
+    //     ...query.price,
+    //     [Op.lte]: [req.query.price.max],
+    //   };
+    // }
     // if (req.query.price) {
     //   query.price = {
     //     [Op.between]: [req.query.price.min, req.query.price.max],
@@ -55,20 +73,41 @@ productsRouter.get("/", async (req, res, next) => {
     }
     console.log("query: ", query);
 
+    // const products = await ProductsModel.findAll({
+    //   // where: { ...query },
+    //   // where: { price: { [Op.gte]: 15 } },
+    //   attributes: ["id", "name", "price", "description"],
+    // });
+
     const products = await ProductsModel.findAll({
-      where: { ...query },
-      // where: { price: { [Op.gte]: 15 } },
-      attributes: ["id", "name", "category", "price", "description"],
+      include: [
+        {
+          model: CategoriesModel,
+          attributes: ["name"],
+          through: { attributes: [] },
+        },
+      ],
     });
+
     res.send(products);
   } catch (error) {
     next(error);
   }
 });
 
+//this endpoint is for fetching a single product
+//it will also show the categories for a certain product (include part)
+//related to the many-to-many relation
 productsRouter.get("/:productId", async (req, res, next) => {
   try {
     const product = await ProductsModel.findByPk(req.params.productId, {
+      include: [
+        {
+          model: CategoriesModel,
+          attributes: ["name", "categoryId"],
+          through: { attributes: [] },
+        },
+      ],
       attributes: {
         exclude: ["createdAt", "updatedAt"],
       },
@@ -88,6 +127,7 @@ productsRouter.get("/:productId", async (req, res, next) => {
   }
 });
 
+//this endpoint is for editing a single product
 productsRouter.put("/:productId", async (req, res, next) => {
   try {
     const [numberOfUpdatedRows, updatedRecords] = await ProductsModel.update(
@@ -112,6 +152,7 @@ productsRouter.put("/:productId", async (req, res, next) => {
   }
 });
 
+//this endpoint is for deleting a dingle product
 productsRouter.delete("/:productId", async (req, res, next) => {
   try {
     const numberOfDeletedRows = await ProductsModel.destroy({
@@ -129,6 +170,38 @@ productsRouter.delete("/:productId", async (req, res, next) => {
       );
     }
   } catch (error) {
+    next(error);
+  }
+});
+
+// this endpoint is for fetching all reviews from a certain product
+//is related to the 1-to-many relation
+productsRouter.get("/:productId/reviews", async (req, res, next) => {
+  try {
+    const product = await ProductsModel.findByPk(req.params.productId, {
+      include: {
+        model: ReviewsModel,
+        attributes: ["content"],
+      },
+    });
+    res.send(product);
+  } catch (error) {
+    next(error);
+  }
+});
+
+//this endpoint is for adding a category in a product (for the many-to-many relation)
+//categoryId: in the body
+//productId: in the req.params
+productsRouter.put("/:productId/category", async (req, res, next) => {
+  try {
+    const { id } = await ProductsCategoriesModel.create({
+      productId: req.params.productId,
+      categoryId: req.body.categoryId,
+    });
+    res.status(201).send({ id });
+  } catch (error) {
+    console.log(error);
     next(error);
   }
 });
