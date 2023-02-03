@@ -21,11 +21,13 @@ cartRouter.get("/:userId", async (req, res, next) => {
     const data = await CartModel.findAll({
       include: [{ model: ProductsModel }],
       attributes: [
+        //   "cart.id",
+        "userId",
         "productId",
-        [sequelize.fn("count", sequelize.col("cart.id")), "unitQty"],
+        [sequelize.fn("count", sequelize.col("product.id")), "unitQty"],
         [sequelize.fn("sum", sequelize.col("product.price")), "unitTotalPrice"],
       ],
-      group: ["productId", "product.id"],
+      group: ["productId", "product.id", "userId"],
       where: {
         userId: req.params.userId,
       },
