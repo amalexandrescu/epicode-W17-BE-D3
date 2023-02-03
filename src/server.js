@@ -11,6 +11,7 @@ import {
   genericErrorHandler,
 } from "./errorHandlers.js";
 import categoriesRouter from "./apis/categories/index.js";
+import cartRouter from "./apis/cart/index.js";
 
 const server = express();
 const port = process.env.PORT || 3001;
@@ -25,6 +26,7 @@ server.use("/products", productsRouter);
 server.use("/reviews", reviewsRouter);
 server.use("/users", usersRouter);
 server.use("/categories", categoriesRouter);
+server.use("/cart", cartRouter);
 
 //ERROR HANDLERS
 
