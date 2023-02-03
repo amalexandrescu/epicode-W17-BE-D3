@@ -105,6 +105,26 @@ usersRouter.get("/:userId/reviews", async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+
+  usersRouter.delete("/:userId", async (req, res, next) => {
+    try {
+      const numberOfDeletedRows = await UsersModel.destroy({
+        where: { id: req.params.userId },
+      });
+
+      if (numberOfDeletedRows === 1) {
+        res.status(204).send();
+      } else {
+        next(
+          createHttpError(404, `user with id ${req.params.userId} not found`)
+        );
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
 });
+
+// 87c70e57-b952-4d52-8945-2dce27d9c1f5 user to delete first name
 
 export default usersRouter;

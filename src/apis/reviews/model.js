@@ -17,13 +17,19 @@ const ReviewsModel = sequelize.define("review", {
 
 // 1 to many relationship (1 product -> many reviews)
 
-ProductsModel.hasMany(ReviewsModel);
+ProductsModel.hasMany(ReviewsModel, { onDelete: "CASCADE" });
 // ProductsModel.hasMany(ReviewsModel);
-ReviewsModel.belongsTo(ProductsModel, { foreignKey: { allowNull: false } });
+ReviewsModel.belongsTo(ProductsModel, {
+  foreignKey: { allowNull: false },
+  onDelete: "CASCADE",
+});
 
 // 1 to many relationship (1 user -> many reviews)
 
-UsersModel.hasMany(ReviewsModel);
-ReviewsModel.belongsTo(UsersModel, { foreignKey: { allowNull: false } });
+UsersModel.hasMany(ReviewsModel, { onDelete: "CASCADE" });
+ReviewsModel.belongsTo(UsersModel, {
+  foreignKey: { allowNull: false },
+  onDelete: "CASCADE",
+});
 
 export default ReviewsModel;

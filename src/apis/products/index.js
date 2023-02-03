@@ -89,6 +89,14 @@ productsRouter.get("/", async (req, res, next) => {
           attributes: ["name"],
           through: { attributes: [] },
         },
+        {
+          model: ReviewsModel,
+          attributes: ["content", "id"],
+          include: {
+            model: UsersModel,
+            attributes: ["firstName", "lastName"],
+          },
+        },
       ],
     });
 

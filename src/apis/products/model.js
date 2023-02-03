@@ -35,10 +35,12 @@ const ProductsModel = sequelize.define("product", {
 ProductsModel.belongsToMany(CategoriesModel, {
   through: ProductsCategoriesModel,
   foreignKey: { name: "productId", allowNull: false },
+  onDelete: "CASCADE",
 });
 CategoriesModel.belongsToMany(ProductsModel, {
   through: ProductsCategoriesModel,
   foreignKey: { name: "categoryId", allowNull: false },
+  onDelete: "CASCADE",
 });
 
 export default ProductsModel;
