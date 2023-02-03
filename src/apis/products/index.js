@@ -37,7 +37,7 @@ productsRouter.get("/", async (req, res, next) => {
   try {
     // const test = await ProductsModel.max("price");
     // console.log("test: ", test);
-    const query = {};
+    let query = {};
     // if (req.query.price.min) {
     //   query.price = {
     //     ...query.price,
@@ -72,7 +72,21 @@ productsRouter.get("/", async (req, res, next) => {
     }
 
     if (req.query.name) {
-      query.name = { [Op.iLike]: `%${req.query.name}` };
+      query.name = { [Op.iLike]: `%${req.query.name}%` };
+    }
+
+    const pagination = {};
+    if (req.query.limit) {
+      pagination.limit = req.query.limit;
+    }
+    if (req.query.offset) {
+      pagination.offset = req.query.offset;
+    }
+    let categoryQuery = {};
+    if (req.query.category) {
+      categoryQuery = {
+        name: { [Op.like]: `%${req.query.category}%` },
+      };
     }
     console.log("query: ", query);
 
@@ -83,10 +97,16 @@ productsRouter.get("/", async (req, res, next) => {
     // });
 
     const products = await ProductsModel.findAll({
+      ...pagination,
+      where: { ...query },
       include: [
         {
           model: CategoriesModel,
-          attributes: ["name"],
+          where: {
+            ...categoryQuery,
+          },
+          as: "categories",
+          // attributes: ["name"],
           through: { attributes: [] },
         },
         {
